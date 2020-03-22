@@ -3,7 +3,7 @@ import praw
 import sys
 
 def main():
-    if len(sys.argv) is not 4:
+    if len(sys.argv) is not 5:
         usage()
         exit()
 
