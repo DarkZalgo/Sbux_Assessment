@@ -2,6 +2,7 @@
 import praw
 import sys
 
+
 def main():
     if len(sys.argv) is not 5:
         usage()
@@ -20,19 +21,10 @@ def main():
     sub_set = set()
     sub_dict = dict()
 
-    for subreddit in reddit.subreddit("popular").hot(limit=100):
-        sub_set.add(subreddit.subreddit_name_prefixed)
-
     for submission in reddit.subreddit("popular").hot(limit=100):
         title = str(submission.title)
         sub_name = submission.subreddit_name_prefixed
-
-        comment_votes =                    \
-            "Comments = "                  \
-            + str(submission.num_comments) \
-            + " Upvotes = "                \
-            + str(submission.ups)
-
+        sub_set.add(sub_name)
         comment_votes = "Comments = " + str(submission.num_comments) + " Upvotes = " + str(submission.ups)
 
 
@@ -57,13 +49,17 @@ def main():
     print("Unique subreddits")
     for unique in sub_set:
         print(unique)
+
     print("\nGreater than 1k comments")
     print(gt1k)
+
     print("OC Posts")
     print(oc)
 
+
 def usage():
     print("./reddit_get.py <reddit username> <reddit password> <client secret> <client id>")
+
 
 if __name__ == "__main__":
     main()
