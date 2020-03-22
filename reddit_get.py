@@ -62,7 +62,6 @@ def main():
     print("OC Posts")
     print(oc)
 
-
 def usage():
     print("./reddit_get.py <reddit username> <reddit password> <client secret> <client id>")
 
