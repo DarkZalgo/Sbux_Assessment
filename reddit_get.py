@@ -20,7 +20,6 @@ def main():
     sub_set = set()
     sub_dict = dict()
 
-
     for subreddit in reddit.subreddit("popular").hot(limit=100):
         sub_set.add(subreddit.subreddit_name_prefixed)
 
