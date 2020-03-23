@@ -103,7 +103,7 @@ def main():
         top_ten_str += title + "\n" + comment_votes + "\n\n"
 
     multi_reddits = [subreddit for subreddit in more_than_once_dict.keys() if more_than_once_dict[subreddit] > 1]
-    multi_reddits.sort()
+    multi_reddits.sort(key=lambda x: x.upper())
 
     print_center("OC Posts")
     print(oc)
@@ -117,11 +117,11 @@ def main():
     print(top_ten_str)
 
     print_center("Unique subreddits")
-    print_center(sorted(unique_sub_set),num=len(max(unique_sub_set,key=lambda x: len(x)))+2)
+    print_center(sorted(unique_sub_set,key=lambda x: x.upper()), num=len(max(unique_sub_set, key=lambda x: len(x)))+2)
     print("Number of unique subreddits:", len(unique_sub_set))
 
     print_center("Creating multi reddit with the following reddits:", num=55)
-    print_center(multi_reddits, first=False,num=55)
+    print_center(multi_reddits, first=False, num=55)
 
     #reddit.multireddit.create("More Than Once r/popular", multi_reddits)
 
@@ -134,18 +134,21 @@ def center(dash, string):
     return f"{{:^{len(dash)}}}".format(string)
 
 
-def print_center(in_str, num=27,first=True):
+def print_center(in_str, num=27, first=True):
     dashes = "-" * num
     if first:
-        print("\n"+dashes)
+        print("\n" + dashes)
+
     if isinstance(in_str, list):
         for s in in_str:
-            print(center(dashes,s))
-    if isinstance(in_str, str):
+            print(center(dashes, s))
+
+    elif isinstance(in_str, str):
         print("\n")
         print(center(dashes, in_str))
         print("\n")
-    print(dashes+"\n")
+
+    print(dashes + "\n")
 
 
 if __name__ == "__main__":
