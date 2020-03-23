@@ -8,7 +8,10 @@ def main():
     if len(sys.argv) is not 5:
         usage()
         exit()
-
+    '''
+    Tries to import praw and if it's not found will ask for user input to install
+    after install will re-run the command given by the user
+    '''
     try:
         import praw
     except ModuleNotFoundError:
@@ -17,22 +20,28 @@ def main():
         if install_choice.lower() == "y" or install_choice.lower == "yes":
             try:
                 os.system("pip3 install praw")
-            except:
+            except Exception as e:
                 print("Could not install praw module")
+                print(e)
                 exit(-1)
-            print("\npraw module installed successfully\nRunning original command")
+
             cmdstr = ""
             for arg in sys.argv:
                 cmdstr += arg + " "
+            print("\npraw module installed successfully\nRunning original command\n"+cmdstr)
             os.system(cmdstr)
             exit(0)
 
-    reddit = praw.Reddit(
+    '''
+    Instantiates the Reddit object with a user given username, password, client_id, and client_secret
+    '''
+    reddit = praw.Reddit\
+    (
         username=sys.argv[1],
         password=sys.argv[2],
         client_id=sys.argv[3],
         client_secret=sys.argv[4],
-        user_agent="pc:reddit_get:v1 (by u/dark_zalgo)",
+        user_agent="pc:reddit_get:v1 (by u/dark_zalgo)"
     )
 
     more_than_one_k_str = ""
@@ -55,11 +64,7 @@ def main():
         '''
         Checks for OC, if exists adds it to str and counts it
         '''
-        if (
-            " OC " in title.upper()
-            or "[OC]" in title.upper()
-            or "ORIGINAL CONTENT" in title.upper()
-        ):
+        if submission.is_original_content:
             oc_count+=1
             oc += title + "\n" + comment_votes + "\n\n"
         '''
@@ -92,19 +97,36 @@ def main():
         elif sub_name in more_than_once_dict.keys():
             more_than_once_dict[sub_name] += 1
 
+    '''
+    Sorts the top ten priority queue in descending order
+    '''
     top_ten_desc = [tup for tup in top_ten.queue]
     top_ten_desc.sort(key=lambda x: -x[0])
+
+    '''
+    Turns the unique subreddit set into a list for sorting and iteration
+    '''
     unique_sub_set = list(unique_sub_set)
 
+    '''
+    Gets the top 10 submission titles/comments/upvotes and turns it into string
+    '''
     for i in range(len(top_ten_desc)):
         submission = top_ten_desc[i][1]
         title = str(submission.title)
         comment_votes = "Comments = " + str(submission.num_comments) + " Upvotes = " + str(submission.ups)
         top_ten_str += title + "\n" + comment_votes + "\n\n"
 
+    '''
+    Places all the subreddits that occur more than once into a list
+    then sorts it by alphabetical order for easier viewing
+    '''
     multi_reddits = [subreddit for subreddit in more_than_once_dict.keys() if more_than_once_dict[subreddit] > 1]
     multi_reddits.sort(key=lambda x: x.upper())
 
+    '''
+    Prints out all the requested information
+    '''
     print_center("OC Posts")
     print(oc)
     print("Number of OC posts", oc_count)
@@ -117,27 +139,35 @@ def main():
     print(top_ten_str)
 
     print_center("Unique subreddits")
-    print_center(sorted(unique_sub_set,key=lambda x: x.upper()), num=len(max(unique_sub_set, key=lambda x: len(x)))+2)
+    print_center(sorted(unique_sub_set, key=lambda x: x.upper()), num=len(max(unique_sub_set, key=lambda x: len(x)))+2)
     print("Number of unique subreddits:", len(unique_sub_set))
 
     print_center("Creating multi reddit with the following reddits:", num=55)
-    print_center(multi_reddits, first=False, num=55)
+    print_center(multi_reddits, num=55)
 
+    '''
+    Creates the multireddit
+    '''
     #reddit.multireddit.create("More Than Once r/popular", multi_reddits)
 
 
 def usage():
-    print("./reddit_get.py <reddit username> <reddit password> <client secret> <client id>")
+    print("./reddit_get.py <reddit username> <reddit password> <client id> <client secret>")
 
 
+'''
+Formats the string centered on the length of the dashes
+'''
 def center(dash, string):
     return f"{{:^{len(dash)}}}".format(string)
 
 
-def print_center(in_str, num=27, first=True):
+'''
+Prints a given list or string centered on dashes
+'''
+def print_center(in_str, num=27):
     dashes = "-" * num
-    if first:
-        print("\n" + dashes)
+    print("\n" + dashes)
 
     if isinstance(in_str, list):
         for s in in_str:
