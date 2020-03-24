@@ -35,9 +35,10 @@ def main():
     '''
     Instantiates the Reddit object with a user given username, password, client_id, and client_secret
     '''
+    username = sys.argv[1]
     reddit = praw.Reddit\
     (
-        username=sys.argv[1],
+        username=username,
         password=sys.argv[2],
         client_id=sys.argv[3],
         client_secret=sys.argv[4],
@@ -53,11 +54,11 @@ def main():
     oc_count = 0
     oc = ""
 
-    top_ten = PriorityQueue(maxsize=10)
+    top_ten_q = PriorityQueue(maxsize=10)
     top_ten_str = ""
 
     for submission in reddit.subreddit("popular").hot(limit=100):
-        title = str(submission.title)
+        title = submission.title
         sub_name = submission.subreddit_name_prefixed
         comment_votes = "Comments = " + str(submission.num_comments) + " Upvotes = " + str(submission.ups)
 
@@ -78,11 +79,11 @@ def main():
         Adds submissions to top 10 then after all 10 are added, checks if incoming
         submission has more upvotes than the lowest submission then adds it to str
         '''
-        if top_ten.qsize() < 10:
-            top_ten.put((submission.ups, submission))
-        elif top_ten.qsize() == 10 and submission.ups > top_ten.queue[9][0]:
-            top_ten.get()
-            top_ten.put((submission.ups, submission))
+        if top_ten_q.qsize() < 10:
+            top_ten_q.put((submission.ups, submission))
+        elif top_ten_q.qsize() == 10 and submission.ups > top_ten_q.queue[9][0]:
+            top_ten_q.get()
+            top_ten_q.put((submission.ups, submission))
 
         '''
         Creates a unique set of every subreddit name
@@ -98,9 +99,9 @@ def main():
             more_than_once_dict[sub_name] += 1
 
     '''
-    Sorts the top ten priority queue in descending order
+    Sorts the top ten priority queue in descending order in a new list
     '''
-    top_ten_desc = [tup for tup in top_ten.queue]
+    top_ten_desc = [tup for tup in top_ten_q.queue]
     top_ten_desc.sort(key=lambda x: -x[0])
 
     '''
@@ -148,7 +149,16 @@ def main():
     '''
     Creates the multireddit
     '''
-    #reddit.multireddit.create("More Than Once r/popular", multi_reddits)
+    reddit.multireddit.create("new_multi", multi_reddits)
+    multi_str =""
+
+    for submission in reddit.multireddit( username, "new_multi").hot(limit=100):
+        title = submission.title
+        comment_votes = "Comments = " + str(submission.num_comments) + " Upvotes = " + str(submission.ups)
+        url = "https://www.reddit.com" + submission.permalink
+        multi_str += "\n"+title+"\n"+"URL = "+url+"\n"+comment_votes+"\n\n"
+    print_center("Multireddit Subreddits")
+    print(multi_str)
 
 
 def usage():
