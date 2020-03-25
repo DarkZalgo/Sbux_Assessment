@@ -2,6 +2,11 @@
 import sys
 import os
 from queue import PriorityQueue
+from datetime import datetime
+import csv
+import re
+
+now = datetime.now()
 
 
 def main():
@@ -45,35 +50,32 @@ def main():
         user_agent="pc:reddit_get:v1 (by u/dark_zalgo)"
     )
 
-    more_than_one_k_str = ""
+    more_than_one_k_list = []
     more_than_one_k_count = 0
 
     unique_sub_set = set()
     more_than_once_dict = dict()
 
     oc_count = 0
-    oc = ""
+    oc_list = []
 
     top_ten_q = PriorityQueue(maxsize=10)
-    top_ten_str = ""
 
     for submission in reddit.subreddit("popular").hot(limit=100):
-        title = submission.title
         sub_name = submission.subreddit_name_prefixed
-        comment_votes = "Comments = " + str(submission.num_comments) + " Upvotes = " + str(submission.ups)
 
         '''
         Checks for OC, if exists adds it to str and counts it
         '''
         if submission.is_original_content:
-            oc_count+=1
-            oc += title + "\n" + comment_votes + "\n\n"
+            oc_count += 1
+            oc_list.append(submission)
         '''
         Checks if submission has more than 1000 comments then adds it to str
         '''
         if submission.num_comments > 1000:
             more_than_one_k_count += 1
-            more_than_one_k_str += title + "\n" + comment_votes + "\n\n"
+            more_than_one_k_list.append(submission)
 
         '''
         Adds submissions to top 10 then after all 10 are added, checks if incoming
@@ -101,22 +103,12 @@ def main():
     '''
     Sorts the top ten priority queue in descending order in a new list
     '''
-    top_ten_desc = [tup for tup in top_ten_q.queue]
-    top_ten_desc.sort(key=lambda x: -x[0])
+    top_ten_list = [tup[1] for tup in sorted(top_ten_q.queue, key=lambda x: -x[0])]
 
     '''
     Turns the unique subreddit set into a list for sorting and iteration
     '''
     unique_sub_set = list(unique_sub_set)
-
-    '''
-    Gets the top 10 submission titles/comments/upvotes and turns it into string
-    '''
-    for i in range(len(top_ten_desc)):
-        submission = top_ten_desc[i][1]
-        title = str(submission.title)
-        comment_votes = "Comments = " + str(submission.num_comments) + " Upvotes = " + str(submission.ups)
-        top_ten_str += title + "\n" + comment_votes + "\n\n"
 
     '''
     Places all the subreddits that occur more than once into a list
@@ -125,19 +117,9 @@ def main():
     multi_reddits = [subreddit for subreddit in more_than_once_dict.keys() if more_than_once_dict[subreddit] > 1]
     multi_reddits.sort(key=lambda x: x.upper())
 
-    '''
-    Prints out all the requested information
-    '''
-    print_center("OC Posts")
-    print(oc)
     print("Number of OC posts", oc_count)
 
-    print_center("Greater than 1k comments")
-    print(more_than_one_k_str)
     print("Number of posts greater than 1K comments:", more_than_one_k_count)
-
-    print_center("Top Ten Posts")
-    print(top_ten_str)
 
     print_center("Unique subreddits")
     print_center(sorted(unique_sub_set, key=lambda x: x.upper()), num=len(max(unique_sub_set, key=lambda x: len(x)))+2)
@@ -149,16 +131,10 @@ def main():
     '''
     Creates the multireddit
     '''
-    reddit.multireddit.create("new_multi", multi_reddits)
-    multi_str =""
-
-    for submission in reddit.multireddit( username, "new_multi").hot(limit=100):
-        title = submission.title
-        comment_votes = "Comments = " + str(submission.num_comments) + " Upvotes = " + str(submission.ups)
-        url = "https://www.reddit.com" + submission.permalink
-        multi_str += "\n"+title+"\n"+"URL = "+url+"\n"+comment_votes+"\n\n"
-    print_center("Multireddit Subreddits")
-    print(multi_str)
+    #reddit.multireddit.create("new_multi", multi_reddits)
+    sub_to_csv(oc_list, "Original Content")
+    sub_to_csv(more_than_one_k_list, "More Than 1000 Comments")
+    sub_to_csv(top_ten_list, "Top Ten")
 
 
 def usage():
@@ -189,6 +165,24 @@ def print_center(in_str, num=27):
         print("\n")
 
     print(dashes + "\n")
+
+
+'''
+Given a list of submissions and their category,
+writes a CSV file 
+'''
+def sub_to_csv(submission_list, category):
+    with open ('submissions_' + now.strftime("%Y-%m-%d_%I-%M-%S_%p") + ".csv", 'a') as csvfile:
+
+        sub_writer = csv.writer(csvfile, delimiter=",", quotechar='\"', quoting=csv.QUOTE_NONE, escapechar='\\')
+        if not hasattr(sub_to_csv, 'created_header'):
+            sub_to_csv.created_header = True
+            sub_writer.writerow(["Category", "Title", "URL", "Upvotes", "Comments"])
+
+
+        for sub in submission_list:
+            sub_writer.writerow([category, re.sub(",", "", sub.title), "https://www.reddit.com"+sub.permalink, sub.ups, sub.num_comments])
+            print(sub.title)
 
 
 if __name__ == "__main__":
