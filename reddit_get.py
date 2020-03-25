@@ -13,6 +13,7 @@ def main():
     if len(sys.argv) is not 5:
         usage()
         exit()
+
     '''
     Tries to import praw and if it's not found will ask for user input to install
     after install will re-run the command given by the user
@@ -132,6 +133,10 @@ def main():
     Creates the multireddit
     '''
     #reddit.multireddit.create("new_multi", multi_reddits)
+
+    '''
+    Creates the csv for each of the submission lists
+    '''
     sub_to_csv(oc_list, "Original Content")
     sub_to_csv(more_than_one_k_list, "More Than 1000 Comments")
     sub_to_csv(top_ten_list, "Top Ten")
@@ -179,10 +184,9 @@ def sub_to_csv(submission_list, category):
             sub_to_csv.created_header = True
             sub_writer.writerow(["Category", "Title", "URL", "Upvotes", "Comments"])
 
-
         for sub in submission_list:
-            sub_writer.writerow([category, re.sub(",", "", sub.title), "https://www.reddit.com"+sub.permalink, sub.ups, sub.num_comments])
-            print(sub.title)
+            sub_writer.writerow([category, re.sub(",", "", sub.title), "https://www.reddit.com"+sub.permalink,
+                                 sub.ups, sub.num_comments])
 
 
 if __name__ == "__main__":
