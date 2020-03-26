@@ -66,13 +66,13 @@ def main():
         sub_name = submission.subreddit_name_prefixed
 
         '''
-        Checks for OC, if exists adds it to str and counts it
+        Checks for OC, if exists adds it to list and counts it
         '''
         if submission.is_original_content:
             oc_count += 1
             oc_list.append(submission)
         '''
-        Checks if submission has more than 1000 comments then adds it to str
+        Checks if submission has more than 1000 comments then adds it to list
         '''
         if submission.num_comments > 1000:
             more_than_one_k_count += 1
@@ -80,7 +80,7 @@ def main():
 
         '''
         Adds submissions to top 10 then after all 10 are added, checks if incoming
-        submission has more upvotes than the lowest submission then adds it to str
+        submission has more upvotes than the lowest submission then adds it to queue
         '''
         if top_ten_q.qsize() < 10:
             top_ten_q.put((submission.ups, submission))
@@ -137,9 +137,10 @@ def main():
     '''
     Creates the csv for each of the submission lists
     '''
-    sub_to_csv(oc_list, "Original Content")
-    sub_to_csv(more_than_one_k_list, "More Than 1000 Comments")
-    sub_to_csv(top_ten_list, "Top Ten")
+    sub_to_csv(oc_list, "OC")
+    sub_to_csv(more_than_one_k_list, "MORE_THAN_ONE_K")
+    sub_to_csv(top_ten_list, "TOP_TEN")
+
 
 
 def usage():
@@ -173,19 +174,18 @@ def print_center(in_str, num=27):
 
 
 '''
-Given a list of submissions and their category,
-writes a CSV file 
+Given a list of submissions and their category, writes a CSV file 
 '''
 def sub_to_csv(submission_list, category):
-    with open ('submissions_' + now.strftime("%Y-%m-%d_%I-%M-%S_%p") + ".csv", 'a') as csvfile:
+    with open('submissions_' + now.strftime("%Y-%m-%d_%I-%M-%S%p") + ".csv", 'a') as csvfile:
+        sub_writer = csv.writer(csvfile, delimiter=",", quotechar=chr(34), quoting=csv.QUOTE_NONE, escapechar=",")
 
-        sub_writer = csv.writer(csvfile, delimiter=",", quotechar='\"', quoting=csv.QUOTE_NONE, escapechar='\\')
         if not hasattr(sub_to_csv, 'created_header'):
-            sub_to_csv.created_header = True
             sub_writer.writerow(["Category", "Title", "URL", "Upvotes", "Comments"])
+            sub_to_csv.created_header = True
 
-        for sub in submission_list:
-            sub_writer.writerow([category, re.sub(",", "", sub.title), "https://www.reddit.com"+sub.permalink,
+        for sub in submission_list:      #Removes commas that mess up the output of CSV
+            sub_writer.writerow([category, re.sub(",", "", sub.title), "https://www.reddit.com" + sub.permalink,
                                  sub.ups, sub.num_comments])
 
 
