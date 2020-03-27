@@ -6,7 +6,10 @@ from datetime import datetime
 import csv
 import re
 
-now = datetime.now()
+'''
+Gets date for csv timestamp
+'''
+date = datetime.now().strftime("%Y-%m-%d_%I-%M-%S%p")
 
 
 def main():
@@ -22,7 +25,7 @@ def main():
         import praw
     except ModuleNotFoundError:
         print("praw module not found")
-        install_choice = input("Would you like to install praw? Y/N\n")
+        install_choice = input("Would you like to install praw using pip3? Y/N\n")
         if install_choice.lower() == "y" or install_choice.lower == "yes":
             try:
                 os.system("pip3 install praw")
@@ -37,6 +40,9 @@ def main():
             print("\npraw module installed successfully\nRunning original command\n"+cmdstr)
             os.system(cmdstr)
             exit(0)
+        else:
+            print("Execution cannot continue without praw module, please install.")
+            exit(-1)
 
     '''
     Instantiates the Reddit object with a user given username, password, client_id, and client_secret
@@ -113,34 +119,44 @@ def main():
 
     '''
     Places all the subreddits that occur more than once into a list
-    then sorts it by alphabetical order for easier viewing
+    then sorts it by alphabetical order for easier viewing for multireddit
     '''
     multi_reddits = [subreddit for subreddit in more_than_once_dict.keys() if more_than_once_dict[subreddit] > 1]
     multi_reddits.sort(key=lambda x: x.upper())
 
-    print("Number of OC posts", oc_count)
-
-    print("Number of posts greater than 1K comments:", more_than_one_k_count)
-
-    print_center("Unique subreddits")
-    print_center(sorted(unique_sub_set, key=lambda x: x.upper()), num=len(max(unique_sub_set, key=lambda x: len(x)))+2)
-    print("Number of unique subreddits:", len(unique_sub_set))
-
-    print_center("Creating multi reddit with the following reddits:", num=55)
-    print_center(multi_reddits, num=55)
-
     '''
-    Creates the multireddit
+    Checks if multireddit exists, if it does asks for overwrite, if it doesn't, simply creates it.
     '''
-    #reddit.multireddit.create("new_multi", multi_reddits)
+    if reddit.subreddits.search_by_name("new_multi"):
+        if input("Multireddit exists, would you like to overwrite it?\n").lower() == "y":
+            reddit.multireddit(username, 'new_multi').delete()
+            reddit.multireddit.create("new_multi", multi_reddits)
+
+            print_center("Creating multireddit new_multi with the following reddits:")
+            print_center(multi_reddits)
+            print("Done!")
+    else:
+        reddit.multireddit.create("new_multi", multi_reddits)
+
+        print_center("Creating multireddit new_multi with the following reddits:")
+        print_center(multi_reddits)
+        print("Done!")
 
     '''
     Creates the csv for each of the submission lists
     '''
-    sub_to_csv(oc_list, "OC")
-    sub_to_csv(more_than_one_k_list, "MORE_THAN_ONE_K")
-    sub_to_csv(top_ten_list, "TOP_TEN")
+    sub_to_csv(oc_list, "oc")
+    sub_to_csv(more_than_one_k_list, "more_than_one_k")
+    sub_to_csv(top_ten_list, "top_ten")
 
+    '''
+    Creates a CSV without a function because unique_sub_list has different fields
+    '''
+    with open('unique_submissions_' + date + ".csv", 'w') as unique_csv:
+        unique_writer = csv.writer(unique_csv, delimiter=",")
+        unique_writer.writerow(["subreddit_name", "subreddit_url"])
+        for unique_sub in sorted(unique_sub_set, key=lambda x: x.upper()):
+            unique_writer.writerow([unique_sub[2:], "https://reddit.com/"+str(unique_sub)])
 
 
 def usage():
@@ -157,7 +173,7 @@ def center(dash, string):
 '''
 Prints a given list or string centered on dashes
 '''
-def print_center(in_str, num=27):
+def print_center(in_str, num=55):
     dashes = "-" * num
     print("\n" + dashes)
 
@@ -177,15 +193,13 @@ def print_center(in_str, num=27):
 Given a list of submissions and their category, writes a CSV file 
 '''
 def sub_to_csv(submission_list, category):
-    with open('submissions_' + now.strftime("%Y-%m-%d_%I-%M-%S%p") + ".csv", 'a') as csvfile:
-        sub_writer = csv.writer(csvfile, delimiter=",", quotechar=chr(34), quoting=csv.QUOTE_NONE, escapechar=",")
+    with open(category + '_submissions_' + date + ".csv", 'w') as csv_file:
+        sub_writer = csv.writer(csv_file, delimiter=",", quotechar=chr(34), quoting=csv.QUOTE_NONE, escapechar=",")
 
-        if not hasattr(sub_to_csv, 'created_header'):
-            sub_writer.writerow(["Category", "Title", "URL", "Upvotes", "Comments"])
-            sub_to_csv.created_header = True
+        sub_writer.writerow(["Title", "URL", "Upvotes", "Comments"])
 
         for sub in submission_list:      #Removes commas that mess up the output of CSV
-            sub_writer.writerow([category, re.sub(",", "", sub.title), "https://www.reddit.com" + sub.permalink,
+            sub_writer.writerow([re.sub(",", "", sub.title), "https://www.reddit.com" + sub.permalink,
                                  sub.ups, sub.num_comments])
 
 
