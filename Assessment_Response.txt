@@ -1,0 +1,25 @@
+Starbucks Internship Assessment - John Cummings
+
+
+Usage documentation:
+reddit_get.py was written with python3.7.7 and requires the praw module to run
+
+The command to run reddit_get.py is as follows:
+./reddit_get.py <username> <password> <client_id> <client_secret>
+or python3 reddit_get.py <username> <password> <client_id> <client_secret>
+
+
+1.)The assignment took me approximately 10 hours.
+
+2.)The most challenging part for me was presenting the output in a meaningful way. I spent at least a third of my time on the project going between how to present the output.
+I kept going back and forth between exactly how to format the csv, and whether I should have it all in one csv files or in one csv file per list.
+
+3.)I learned quite a bit from this assignment, namely how to use the PRAW module in python such as how to get various information from subreddits and their submissions.
+I also learned how to get the variable names of some of the attributes for each submission from reddit itself. I also had to refresh my memory
+on several pieces of python I had forgotten over time, such as how to use lambda statements and list comprehensions.
+
+4.)I saved the output in a csv format because I thought that it would be easier to use than other formats. Because csv takes such little effort to use, it would
+make it a better candidate in an environment where usability may be more important than storage. In the context of the assignment it made sense because
+the output was categorized in a specific way that didn't require any kind of sophisticated storage.
+
+5.)I was able to finish the assessment.
