@@ -5,6 +5,7 @@ from queue import PriorityQueue
 from datetime import datetime
 import csv
 import re
+import praw
 
 '''
 Gets date for csv timestamp
@@ -17,32 +18,6 @@ def main():
         usage()
         exit()
 
-    '''
-    Tries to import praw and if it's not found will ask for user input to install
-    after install will re-run the command given by the user
-    '''
-    try:
-        import praw
-    except ModuleNotFoundError:
-        print("praw module not found")
-        install_choice = input("Would you like to install praw using pip3? Y/N\n")
-        if install_choice.lower() == "y" or install_choice.lower == "yes":
-            try:
-                os.system("pip3 install praw")
-            except Exception as e:
-                print("Could not install praw module")
-                print(e)
-                exit(-1)
-
-            cmdstr = ""
-            for arg in sys.argv:
-                cmdstr += arg + " "
-            print("\npraw module installed successfully\nRunning original command\n"+cmdstr)
-            os.system(cmdstr)
-            exit(0)
-        else:
-            print("Execution cannot continue without praw module, please install.")
-            exit(-1)
 
     '''
     Instantiates the Reddit object with a user given username, password, client_id, and client_secret
