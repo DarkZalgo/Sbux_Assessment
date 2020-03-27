@@ -116,6 +116,8 @@ def main():
         [print(reddit) for reddit in multi_reddits]
         print("Done!")
 
+    
+    print("Creating four CSV files")
     '''
     Creates the csv for each of the submission lists
     '''
@@ -131,7 +133,7 @@ def main():
         unique_writer.writerow(["subreddit_name", "subreddit_url"])
         for unique_sub in sorted(unique_sub_set, key=lambda x: x.upper()):
             unique_writer.writerow([unique_sub[2:], "https://reddit.com/"+str(unique_sub)])
-    print(sys.version)
+    print("Done!")
 
 
 def usage():
