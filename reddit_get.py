@@ -132,14 +132,14 @@ def main():
             reddit.multireddit(username, 'new_multi').delete()
             reddit.multireddit.create("new_multi", multi_reddits)
 
-            print_center("Creating multireddit new_multi with the following reddits:")
-            print_center(multi_reddits)
+            print("Creating multireddit new_multi with the following reddits:")
+            [print(reddit) for reddit in multi_reddits]
             print("Done!")
     else:
         reddit.multireddit.create("new_multi", multi_reddits)
 
-        print_center("Creating multireddit new_multi with the following reddits:")
-        print_center(multi_reddits)
+        print("Creating multireddit new_multi with the following reddits:")
+        [print(reddit) for reddit in multi_reddits]
         print("Done!")
 
     '''
@@ -161,33 +161,6 @@ def main():
 
 def usage():
     print("./reddit_get.py <reddit username> <reddit password> <client id> <client secret>")
-
-
-'''
-Formats the string centered on the length of the dashes
-'''
-def center(dash, string):
-    return f"{{:^{len(dash)}}}".format(string)
-
-
-'''
-Prints a given list or string centered on dashes
-'''
-def print_center(in_str, num=55):
-    dashes = "-" * num
-    print("\n" + dashes)
-
-    if isinstance(in_str, list):
-        for s in in_str:
-            print(center(dashes, s))
-
-    elif isinstance(in_str, str):
-        print("\n")
-        print(center(dashes, in_str))
-        print("\n")
-
-    print(dashes + "\n")
-
 
 '''
 Given a list of submissions and their category, writes a CSV file 
