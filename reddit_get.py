@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import sys
-import os
 from queue import PriorityQueue
 from datetime import datetime
 import csv
@@ -132,6 +131,7 @@ def main():
         unique_writer.writerow(["subreddit_name", "subreddit_url"])
         for unique_sub in sorted(unique_sub_set, key=lambda x: x.upper()):
             unique_writer.writerow([unique_sub[2:], "https://reddit.com/"+str(unique_sub)])
+    print(sys.version)
 
 
 def usage():
